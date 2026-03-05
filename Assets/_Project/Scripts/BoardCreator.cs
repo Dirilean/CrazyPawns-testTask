@@ -1,5 +1,3 @@
-using CrazyPawn;
-using EditorAttributes;
 using UnityEngine;
 
 namespace Runtime
@@ -8,35 +6,28 @@ namespace Runtime
     {
         private const float CHECKBOARD_QUAD_SIZE = 1.5f;
 
-        [SerializeField] private CrazyPawnSettings m_settings;
         [SerializeField] private Transform m_chessBoardTransform;
 
         private GameObject[] m_board;
 
-        void Start()
-        {
-            CreateBoard();
-        }
-
-        [Button("Create board")]
-        public void CreateBoard()
+        public void CreateBoard(int CheckerboardSize, Color BlackCellColor, Color WhiteCellColor)
         {
             DeleteBoard();
 
-            float halfCheckBoardSize = -m_settings.CheckerboardSize / 2f * CHECKBOARD_QUAD_SIZE;
+            float halfCheckBoardSize = -CheckerboardSize / 2f * CHECKBOARD_QUAD_SIZE;
             Vector3 offset = new Vector3(halfCheckBoardSize, 0, halfCheckBoardSize);
-            
-            m_board = new GameObject[m_settings.CheckerboardSize * m_settings.CheckerboardSize];
-            for (int row = 0; row < m_settings.CheckerboardSize; row++)
+
+            m_board = new GameObject[CheckerboardSize * CheckerboardSize];
+            for (int row = 0; row < CheckerboardSize; row++)
             {
-                for (int col = 0; col < m_settings.CheckerboardSize; col++)
+                for (int col = 0; col < CheckerboardSize; col++)
                 {
-                    m_board[row*m_settings.CheckerboardSize+col] = CreateQuad(row, col, offset);
+                    m_board[row * CheckerboardSize + col] =
+                        CreateQuad(row, col, offset, BlackCellColor, WhiteCellColor);
                 }
             }
         }
 
-        [Button("Delete board"),]
         public void DeleteBoard()
         {
             if (m_board == null) return;
@@ -49,7 +40,7 @@ namespace Runtime
             m_board = null;
         }
 
-        private GameObject CreateQuad(int _row, int _col, Vector3 _offset)
+        private GameObject CreateQuad(int _row, int _col, Vector3 _offset, Color _BlackCellColor, Color _WhiteCellColor)
         {
             var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             quad.transform.SetParent(m_chessBoardTransform);
@@ -63,7 +54,7 @@ namespace Runtime
             bool isEvenCol = _col % 2 == 0;
             bool isWhiteCell = isEvenRow ^ isEvenCol;
             quad.GetComponent<Renderer>().material.color =
-                isWhiteCell ? m_settings.WhiteCellColor : m_settings.BlackCellColor;
+                isWhiteCell ? _WhiteCellColor : _BlackCellColor;
 
             return quad;
         }
