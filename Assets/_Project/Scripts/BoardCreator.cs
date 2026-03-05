@@ -13,9 +13,10 @@ namespace Runtime
         public void CreateBoard(int CheckerboardSize, Color BlackCellColor, Color WhiteCellColor)
         {
             DeleteBoard();
-
-            float halfCheckBoardSize = -CheckerboardSize / 2f * CHECKBOARD_QUAD_SIZE;
-            Vector3 offset = new Vector3(halfCheckBoardSize, 0, halfCheckBoardSize);
+            
+            //Вычисляем середину доски с учетом что пивот quad в его центре 
+            float CenterCheckBoardSize = -CheckerboardSize * 0.5f * CHECKBOARD_QUAD_SIZE + (CHECKBOARD_QUAD_SIZE * 0.5f);
+            Vector3 offset = new Vector3(CenterCheckBoardSize, 0, CenterCheckBoardSize);
 
             m_board = new GameObject[CheckerboardSize * CheckerboardSize];
             for (int row = 0; row < CheckerboardSize; row++)
