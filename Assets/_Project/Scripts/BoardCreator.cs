@@ -1,4 +1,5 @@
 using CrazyPawn;
+using EditorAttributes;
 using UnityEngine;
 
 namespace Runtime
@@ -17,23 +18,25 @@ namespace Runtime
             CreateBoard();
         }
 
+        [Button("Create board")]
         public void CreateBoard()
         {
             DeleteBoard();
 
             float halfCheckBoardSize = -m_settings.CheckerboardSize / 2f * CHECKBOARD_QUAD_SIZE;
             Vector3 offset = new Vector3(halfCheckBoardSize, 0, halfCheckBoardSize);
-
+            
             m_board = new GameObject[m_settings.CheckerboardSize * m_settings.CheckerboardSize];
             for (int row = 0; row < m_settings.CheckerboardSize; row++)
             {
                 for (int col = 0; col < m_settings.CheckerboardSize; col++)
                 {
-                    m_board[row + col] = CreateQuad(row, col, offset);
+                    m_board[row*m_settings.CheckerboardSize+col] = CreateQuad(row, col, offset);
                 }
             }
         }
 
+        [Button("Delete board"),]
         public void DeleteBoard()
         {
             if (m_board == null) return;
