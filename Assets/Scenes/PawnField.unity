@@ -432,6 +432,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_pawnPrefab: {fileID: 3003941462790291876, guid: 53ae863c3be806844b8e511aa3f46d6f,
     type: 3}
+  m_connectionLinePrefab: {fileID: 3184709151115602927, guid: 8ee0807cc9ff6494c845665dbed57b70,
+    type: 3}
 --- !u!4 &1910849656
 Transform:
   m_ObjectHideFlags: 0

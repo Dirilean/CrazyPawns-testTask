@@ -8,7 +8,7 @@ namespace Runtime
     {
         [SerializeField] private CrazyPawnSettings m_settings;
         [SerializeField] private BoardCreator m_boardCreator;
-        [SerializeField] private PawnsSpawner m_pawnsSpawner;
+        [SerializeField] private PawnsManager m_pawnsSpawner;
 
         private void Start()
         {

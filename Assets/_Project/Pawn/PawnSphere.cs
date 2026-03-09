@@ -7,21 +7,23 @@ namespace Runtime
     [RequireComponent(typeof(Collider))]
     public class PawnSphere : MonoBehaviour, IPointerClickHandler, IDragHandler
     {
+        public bool m_allowConnect = false;
         [SerializeField] public MeshRenderer m_meshRenderer;
         
-        public Action<PointerEventData> m_onClick;
+        public Action<PawnSphere> m_onClick;
         public Action<PointerEventData> m_onDrag;
+        public Action<PawnSphere> m_transformChange;
 
         public void OnPointerClick(PointerEventData _eventData)
         {
-            m_onClick?.Invoke(_eventData);
+            m_onClick?.Invoke(this);
         }
 
         public void OnDrag(PointerEventData _eventData)
         {
             m_onDrag?.Invoke(_eventData);
         }
-        
+
         private void OnValidate()
         {
             if (m_meshRenderer == null)

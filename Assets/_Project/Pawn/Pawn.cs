@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace Runtime
@@ -11,6 +12,9 @@ namespace Runtime
         [SerializeField] private PawnBody m_pawnBody;
         [SerializeField] private PawnSphere[] m_pawnSpheres;
 
+        public Action<Pawn> OnDestroyAction;
+        public Action<Pawn,PawnSphere> OnConnectorClickAction;
+        
         private float m_planeDistance;
         private Vector3 m_clickOffset;
         private Plane m_dragPlane;
@@ -50,8 +54,25 @@ namespace Runtime
         private void OnDragSphere(PointerEventData _pointerEventData)
         { }
 
-        private void OnClickSphere(PointerEventData _pointerEventData)
-        { }
+        private void OnClickSphere(PawnSphere _sphere)
+        {
+            OnConnectorClickAction?.Invoke(this, _sphere);
+        }
+
+        void OnStartConnect()
+        {
+            
+        }
+
+        public void SetActiveState()
+        {
+            SetState(State.ACTIVE);
+        }
+
+        public void SetNormalState()
+        {
+            SetState(State.NORMAL);
+        }
 
         private void OnStartDragBody(PointerEventData _eventData)
         {
@@ -94,13 +115,19 @@ namespace Runtime
             }
             
             UpdateState();
+
+            //Вызываем событие что мы поменяли позицию пешки
+            for (int i = 0; i < m_pawnSpheres.Length; i++)
+            {
+                m_pawnSpheres[i].m_transformChange?.Invoke(m_pawnSpheres[i]);
+            }   
         }
         
         private void UpdateState()
         {
             if (Physics.Raycast(transform.position + m_floorDetectOffset, Vector3.down, out _, MAX_FLOOR_DETECTED_DISTANCE))
             {
-                SetState(State.ACTIVE);
+                SetState(State.NORMAL);
             }
             else
             {
@@ -116,23 +143,33 @@ namespace Runtime
             switch (_state)
             {
                 case State.NORMAL:
-                    SetMaterial(m_normalMat);
+                    SetCommonMaterial(m_normalMat, m_normalMat);
+                    SetAllowConnectionState(false);
                     break;
                 case State.ACTIVE:
-                    SetMaterial(m_activeMat);
+                    SetCommonMaterial(m_normalMat, m_activeMat);
+                    SetAllowConnectionState(true);
                     break;
                 case State.DELETE:
-                    SetMaterial(m_deleteMat);
+                    SetCommonMaterial(m_deleteMat, m_deleteMat);
+                    SetAllowConnectionState(false);
                     break;
             }
         }
-        
-        private void SetMaterial(Material _material)
+
+        private void SetAllowConnectionState(bool _allow)
+        {
+            for (int i = 0; i < m_pawnSpheres.Length; i++)
+            {
+                m_pawnSpheres[i].m_allowConnect = _allow;
+            }
+        }
+        private void SetCommonMaterial(Material _material, Material _connectorMaterial)
         {
             m_pawnBody.m_meshRenderer.material = _material;
             for (int i = 0; i < m_pawnSpheres.Length; i++)
             {
-                m_pawnSpheres[i].m_meshRenderer.material = _material;
+                m_pawnSpheres[i].m_meshRenderer.material = _connectorMaterial;
             }
         }
         
@@ -141,6 +178,11 @@ namespace Runtime
             return _eventData.enterEventCamera ??
                    _eventData.pressEventCamera ??
                    Camera.main;
+        }
+
+        private void OnDestroy()
+        {
+            OnDestroyAction?.Invoke(this);
         }
 
         private void OnValidate()
