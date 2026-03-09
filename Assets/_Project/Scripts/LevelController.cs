@@ -26,7 +26,7 @@ namespace Runtime
         [Button("Create pawns")]
         public void CreatePawns()
         {
-            m_pawnsSpawner.CreatePawns(m_settings.InitialZoneRadius, m_settings.InitialPawnCount);
+            m_pawnsSpawner.CreatePawns(m_settings.InitialZoneRadius, m_settings.InitialPawnCount, m_settings.ActiveConnectorMaterial, m_settings.DeleteMaterial);
         }
     }
 }

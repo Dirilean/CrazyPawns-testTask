@@ -8,22 +8,22 @@ namespace Runtime
 
         private GameObject[] m_board;
 
-        public void CreateBoard(int CheckerboardSize, Color BlackCellColor, Color WhiteCellColor)
+        public void CreateBoard(int _checkerboardSize, Color _blackCellColor, Color _whiteCellColor)
         {
             DeleteBoard();
 
             //Вычисляем середину доски с учетом что пивот quad в его центре 
-            float CenterCheckBoardSize =
-                -CheckerboardSize * 0.5f * ExtraSettings.CHECKBOARD_QUAD_SIZE + (ExtraSettings.CHECKBOARD_QUAD_SIZE * 0.5f);
-            Vector3 offset = new Vector3(CenterCheckBoardSize, 0, CenterCheckBoardSize);
+            float centerCheckBoardSize =
+                -_checkerboardSize * 0.5f * ExtraSettings.CHECKBOARD_QUAD_SIZE + (ExtraSettings.CHECKBOARD_QUAD_SIZE * 0.5f);
+            Vector3 offset = new Vector3(centerCheckBoardSize, 0, centerCheckBoardSize);
 
-            m_board = new GameObject[CheckerboardSize * CheckerboardSize];
-            for (int row = 0; row < CheckerboardSize; row++)
+            m_board = new GameObject[_checkerboardSize * _checkerboardSize];
+            for (int row = 0; row < _checkerboardSize; row++)
             {
-                for (int col = 0; col < CheckerboardSize; col++)
+                for (int col = 0; col < _checkerboardSize; col++)
                 {
-                    m_board[row * CheckerboardSize + col] =
-                        CreateFloorQuad(row, col, offset, BlackCellColor, WhiteCellColor);
+                    m_board[row * _checkerboardSize + col] =
+                        CreateFloorQuad(row, col, offset, _blackCellColor, _whiteCellColor);
                 }
             }
         }
@@ -40,8 +40,8 @@ namespace Runtime
             m_board = null;
         }
 
-        private GameObject CreateFloorQuad(int _row, int _col, Vector3 _offset, Color _BlackCellColor,
-            Color _WhiteCellColor)
+        private GameObject CreateFloorQuad(int _row, int _col, Vector3 _offset, Color _blackCellColor,
+            Color _whiteCellColor)
         {
             var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             quad.transform.SetParent(m_chessBoardTransform);
@@ -56,7 +56,7 @@ namespace Runtime
             bool isEvenCol = _col % 2 == 0;
             bool isWhiteCell = isEvenRow ^ isEvenCol;
             quad.GetComponent<Renderer>().material.color =
-                isWhiteCell ? _WhiteCellColor : _BlackCellColor;
+                isWhiteCell ? _whiteCellColor : _blackCellColor;
 
             return quad;
         }

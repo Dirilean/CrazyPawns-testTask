@@ -4,8 +4,8 @@ using UnityEngine.EventSystems;
 
 public class ClickManager : MonoBehaviour
 {
-    [SerializeField] private LayerMask clickableLayers;
-    [SerializeField] private float maxDistance = 100f;
+    [SerializeField] private LayerMask m_clickableLayers;
+    [SerializeField] private float m_maxDistance = 100f;
     
     private Camera m_camera;
     
@@ -20,15 +20,15 @@ public class ClickManager : MonoBehaviour
         
         Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
         
-        if (Physics.Raycast(ray, out RaycastHit hit, maxDistance, clickableLayers))
+        if (Physics.Raycast(ray, out RaycastHit hit, m_maxDistance, m_clickableLayers))
         {
             OnClick(hit.collider.gameObject);
         }
     }
     
-    private void OnClick(GameObject clickedObject)
+    private void OnClick(GameObject _clickedObject)
     {
-        if (clickedObject.TryGetComponent<IClickable>(out var clickable))
+        if (_clickedObject.TryGetComponent<IClickable>(out var clickable))
         {
             clickable.OnClick();
         }

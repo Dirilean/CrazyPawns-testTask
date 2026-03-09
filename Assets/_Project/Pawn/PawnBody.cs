@@ -7,24 +7,33 @@ namespace Runtime
     [RequireComponent(typeof(Collider))]
     public class PawnBody : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
     {
-        public Action<PointerEventData> onBeginDrag;
-        public Action<PointerEventData> onEndDrag;
-        public Action<PointerEventData> onDrag;
+        [SerializeField] public MeshRenderer m_meshRenderer;
         
-
-        public void OnDrag(PointerEventData eventData)
+        public Action<PointerEventData> m_onBeginDrag;
+        public Action<PointerEventData> m_onEndDrag;
+        public Action<PointerEventData> m_onDrag;
+        
+        public void OnDrag(PointerEventData _eventData)
         {
-            onDrag?.Invoke(eventData);
+            m_onDrag?.Invoke(_eventData);
         }
 
-        public void OnBeginDrag(PointerEventData eventData)
+        public void OnBeginDrag(PointerEventData _eventData)
         {
-            onBeginDrag?.Invoke(eventData);
+            m_onBeginDrag?.Invoke(_eventData);
         }
 
-        public void OnEndDrag(PointerEventData eventData)
+        public void OnEndDrag(PointerEventData _eventData)
         {
-            onDrag?.Invoke(eventData);
+            m_onEndDrag?.Invoke(_eventData);
+        }
+
+        private void OnValidate()
+        {
+            if (m_meshRenderer == null)
+            {
+                m_meshRenderer = GetComponent<MeshRenderer>();
+            }
         }
     }
 }
