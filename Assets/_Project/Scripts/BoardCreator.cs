@@ -4,8 +4,6 @@ namespace Runtime
 {
     public class BoardCreator : MonoBehaviour
     {
-        private const float CHECKBOARD_QUAD_SIZE = 1.5f;
-
         [SerializeField] private Transform m_chessBoardTransform;
 
         private GameObject[] m_board;
@@ -13,9 +11,10 @@ namespace Runtime
         public void CreateBoard(int CheckerboardSize, Color BlackCellColor, Color WhiteCellColor)
         {
             DeleteBoard();
-            
+
             //Вычисляем середину доски с учетом что пивот quad в его центре 
-            float CenterCheckBoardSize = -CheckerboardSize * 0.5f * CHECKBOARD_QUAD_SIZE + (CHECKBOARD_QUAD_SIZE * 0.5f);
+            float CenterCheckBoardSize =
+                -CheckerboardSize * 0.5f * ExtraSettings.CHECKBOARD_QUAD_SIZE + (ExtraSettings.CHECKBOARD_QUAD_SIZE * 0.5f);
             Vector3 offset = new Vector3(CenterCheckBoardSize, 0, CenterCheckBoardSize);
 
             m_board = new GameObject[CheckerboardSize * CheckerboardSize];
@@ -24,7 +23,7 @@ namespace Runtime
                 for (int col = 0; col < CheckerboardSize; col++)
                 {
                     m_board[row * CheckerboardSize + col] =
-                        CreateQuad(row, col, offset, BlackCellColor, WhiteCellColor);
+                        CreateFloorQuad(row, col, offset, BlackCellColor, WhiteCellColor);
                 }
             }
         }
@@ -41,15 +40,17 @@ namespace Runtime
             m_board = null;
         }
 
-        private GameObject CreateQuad(int _row, int _col, Vector3 _offset, Color _BlackCellColor, Color _WhiteCellColor)
+        private GameObject CreateFloorQuad(int _row, int _col, Vector3 _offset, Color _BlackCellColor,
+            Color _WhiteCellColor)
         {
             var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
             quad.transform.SetParent(m_chessBoardTransform);
+            quad.layer = ExtraSettings.FloorLayer;
             quad.transform.localScale = Vector3.one * 1.5f;
             quad.transform.localRotation = Quaternion.Euler(90, 0, 0);
 
             quad.transform.localPosition =
-                new Vector3(_row * CHECKBOARD_QUAD_SIZE, 0, _col * CHECKBOARD_QUAD_SIZE) + _offset;
+                new Vector3(_row * ExtraSettings.CHECKBOARD_QUAD_SIZE, 0, _col * ExtraSettings.CHECKBOARD_QUAD_SIZE) + _offset;
 
             bool isEvenRow = _row % 2 == 0;
             bool isEvenCol = _col % 2 == 0;
