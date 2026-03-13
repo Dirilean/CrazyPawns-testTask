@@ -33,7 +33,10 @@ namespace Runtime
         {
             m_sphereStart = _startSphere;
             StartPointChange(_startSphere);
+            //Чтобы не было мигания из начала координат
+            EndPointChange(_startSphere);
             m_sphereStart.m_transformChange += StartPointChange;
+            hasEnd = false;
         }
 
         public void SetEnd(PawnConnector _endSphere)
@@ -41,30 +44,26 @@ namespace Runtime
             m_sphereEnd = _endSphere;
             EndPointChange(m_sphereEnd);
             m_sphereEnd.m_transformChange += EndPointChange;
+            hasEnd = true;
         }
 
         private void StartPointChange(PawnConnector _obj)
         {
             if (_obj == null || _obj.gameObject == null)
             {
-                Destroy(gameObject);
                 return;
             }
 
             m_lineRenderer.SetPosition(0, _obj.transform.position);
-            hasEnd = false;
         }
 
         private void EndPointChange(PawnConnector _obj)
         {
-            hasEnd = true;
-
             if (_obj == null || _obj.gameObject == null)
             {
-                Destroy(gameObject);
                 return;
             }
-
+            
             m_lineRenderer.SetPosition(1, _obj.transform.position);
             m_lineRenderer.startColor = startNormalColor;
             m_lineRenderer.endColor = endNormalColor;

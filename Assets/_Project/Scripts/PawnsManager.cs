@@ -18,10 +18,18 @@ namespace Runtime
         //Текущая линия которая сейчас коннектится
         private ConnectionLine m_connectingLine;
 
+        private List<ConnectionLine> m_connectingLines = new();
+
+        //Ждем окончания коннекта линии (стартовая точка уже есть)
+        private bool isWaitToEndConnecting = false;
+
+        //Пойман клик во время процесса коннекта
+        private bool hasNewConnectionClick;
+
         public void CreatePawns(float _radius, int _count, Material _activeMat, Material _deleteMat)
         {
             m_lastRadius = _radius;
-            DeletePawns();
+            DeletePawnsAndConnectionsLines();
 
             float maxRandomSquareDistance = _radius * _radius;
             m_pawns.Clear();
@@ -37,12 +45,12 @@ namespace Runtime
 
                 m_pawns.Add(Instantiate(m_pawnPrefab, randomPosInRadius, Quaternion.identity, transform));
                 m_pawns[i].Init(_activeMat, _deleteMat);
-                m_pawns[i].OnDestroyAction += DeletePawnFromList;
+                m_pawns[i].OnDestroyAction += DeletePawn;
                 m_pawns[i].OnConnectorClickAction += ClickConnector;
             }
         }
 
-        public void DeletePawns()
+        public void DeletePawnsAndConnectionsLines()
         {
             if (m_pawns == null) return;
 
@@ -53,9 +61,17 @@ namespace Runtime
             }
 
             m_pawns.Clear();
+
+            for (int i = m_connectingLines.Count - 1; i >= 0; i--)
+            {
+                if (m_connectingLines[i] != null && m_connectingLines[i].gameObject != null)
+                    Destroy(m_connectingLines[i].gameObject);
+            }
+
+            m_connectingLines.Clear();
         }
 
-        private void DeletePawnFromList(Pawn _pawn)
+        private void DeletePawn(Pawn _pawn)
         {
             m_pawns.Remove(_pawn);
         }
@@ -76,6 +92,7 @@ namespace Runtime
 
         public void ClickConnector(Pawn _pawn, PawnConnector _connector)
         {
+            hasNewConnectionClick = true;
             //Начинаем коннект
             if (m_connectingLine == null)
             {
@@ -90,29 +107,50 @@ namespace Runtime
 
                 m_connectingLine = Instantiate(m_connectionLinePrefab, transform);
                 m_connectingLine.SetStart(_connector);
-            }
-            else //Заканчиваем коннект
-            {
-                if (_connector.m_allowConnect)
-                {
-                    //Снимаем выделение
-                    for (int i = 0; i < m_pawns.Count; i++)
-                    {
-                        m_pawns[i].SetNormalState();
-                    }
 
-                    //Заканчиваем коннект
-                    m_connectingLine.SetEnd(_connector);
-                }
-                else
-                {
-                    //Удаляем так как никуда не приконнектились
-                    Destroy(m_connectingLine.gameObject);
-                    m_connectingLine = null;
-                }
+                isWaitToEndConnecting = true;
+            }
+            else if (_connector.m_allowConnect) //Заканчиваем коннект
+            {
+                SetPawnsNormalState();
+
+                //Заканчиваем коннект
+                m_connectingLine.SetEnd(_connector);
+
+                m_connectingLines.Add(m_connectingLine);
+                m_connectingLine = null;
+                isWaitToEndConnecting = false;
             }
         }
 
+        private void LateUpdate()
+        {
+            if (isWaitToEndConnecting && !hasNewConnectionClick && Input.GetMouseButtonDown(0))
+            {
+                isWaitToEndConnecting = false;
+                SetPawnsNormalState();
+                DeleteNotConnectionLine();
+            }
+
+            hasNewConnectionClick = false;
+        }
+
+        private void SetPawnsNormalState()
+        {
+            for (int i = 0; i < m_pawns.Count; i++)
+            {
+                m_pawns[i].SetNormalState();
+            }
+        }
+
+        private void DeleteNotConnectionLine()
+        {
+            if (m_connectingLine != null)
+                Destroy(m_connectingLine.gameObject);
+
+            m_connectingLine = null;
+            isWaitToEndConnecting = false;
+        }
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()

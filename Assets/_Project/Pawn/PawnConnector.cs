@@ -5,7 +5,7 @@ using UnityEngine.EventSystems;
 namespace Runtime
 {
     [RequireComponent(typeof(Collider))]
-    public class PawnConnector : MonoBehaviour, IPointerClickHandler, IDragHandler
+    public class PawnConnector : MonoBehaviour, IPointerDownHandler, IDragHandler
     {
         public bool m_allowConnect = false;
         [SerializeField] public MeshRenderer m_meshRenderer;
@@ -14,7 +14,7 @@ namespace Runtime
         public Action<PointerEventData> m_onDrag;
         public Action<PawnConnector> m_transformChange;
 
-        public void OnPointerClick(PointerEventData _eventData)
+        public void OnPointerDown(PointerEventData _eventData)
         {
             m_onClick?.Invoke(this);
         }

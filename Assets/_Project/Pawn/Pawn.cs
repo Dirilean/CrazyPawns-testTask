@@ -59,11 +59,6 @@ namespace Runtime
             OnConnectorClickAction?.Invoke(this, _sphere);
         }
 
-        void OnStartConnect()
-        {
-            
-        }
-
         public void SetActiveState()
         {
             SetState(State.ACTIVE);
