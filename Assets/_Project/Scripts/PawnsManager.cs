@@ -74,7 +74,7 @@ namespace Runtime
             return Vector3.one;
         }
 
-        public void ClickConnector(Pawn _pawn, PawnSphere _connector)
+        public void ClickConnector(Pawn _pawn, PawnConnector _connector)
         {
             //Начинаем коннект
             if (m_connectingLine == null)

@@ -5,14 +5,14 @@ using UnityEngine.EventSystems;
 namespace Runtime
 {
     [RequireComponent(typeof(Collider))]
-    public class PawnSphere : MonoBehaviour, IPointerClickHandler, IDragHandler
+    public class PawnConnector : MonoBehaviour, IPointerClickHandler, IDragHandler
     {
         public bool m_allowConnect = false;
         [SerializeField] public MeshRenderer m_meshRenderer;
         
-        public Action<PawnSphere> m_onClick;
+        public Action<PawnConnector> m_onClick;
         public Action<PointerEventData> m_onDrag;
-        public Action<PawnSphere> m_transformChange;
+        public Action<PawnConnector> m_transformChange;
 
         public void OnPointerClick(PointerEventData _eventData)
         {

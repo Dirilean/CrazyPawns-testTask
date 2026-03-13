@@ -10,10 +10,10 @@ namespace Runtime
         private Vector3 m_floorDetectOffset = new (0f, 0.2f, 0f);
 
         [SerializeField] private PawnBody m_pawnBody;
-        [SerializeField] private PawnSphere[] m_pawnSpheres;
+        [SerializeField] private PawnConnector[] m_pawnSpheres;
 
         public Action<Pawn> OnDestroyAction;
-        public Action<Pawn,PawnSphere> OnConnectorClickAction;
+        public Action<Pawn,PawnConnector> OnConnectorClickAction;
         
         private float m_planeDistance;
         private Vector3 m_clickOffset;
@@ -54,7 +54,7 @@ namespace Runtime
         private void OnDragSphere(PointerEventData _pointerEventData)
         { }
 
-        private void OnClickSphere(PawnSphere _sphere)
+        private void OnClickSphere(PawnConnector _sphere)
         {
             OnConnectorClickAction?.Invoke(this, _sphere);
         }
@@ -190,7 +190,7 @@ namespace Runtime
             if (m_pawnBody == null)
                 m_pawnBody = gameObject.GetComponentInChildren<PawnBody>(true);
             if (m_pawnSpheres == null || m_pawnSpheres.Length == 0)
-                m_pawnSpheres = gameObject.GetComponentsInChildren<PawnSphere>(true);
+                m_pawnSpheres = gameObject.GetComponentsInChildren<PawnConnector>(true);
         }
     }
 }
