@@ -44,21 +44,33 @@ namespace Runtime
             m_pawnBody.m_onDrag += OnDragBody;
             for (var index = 0; index < m_pawnSpheres.Length; index++)
             {
-                m_pawnSpheres[index].m_onClick += OnClickSphere;
-                m_pawnSpheres[index].m_onDrag += OnDragSphere;
+                m_pawnSpheres[index].m_onPointerDown += OnClickDownConnector;
+                m_pawnSpheres[index].m_onEndDrag += OnEndDragConnector;
             }
 
             m_normalMat = m_pawnBody.m_meshRenderer.sharedMaterial;
         }
-
-        private void OnDragSphere(PointerEventData _pointerEventData)
-        { }
-
-        private void OnClickSphere(PawnConnector _sphere)
+        
+        private void OnClickDownConnector(PawnConnector _sphere)
         {
             OnConnectorClickAction?.Invoke(this, _sphere);
         }
-
+        private void OnEndDragConnector(PointerEventData _eventData)
+        {
+            Ray ray = GetCamera(_eventData).ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                var endPawnConnector= hit.collider.GetComponent<PawnConnector>();
+                if (endPawnConnector != null)
+                {
+                    OnConnectorClickAction?.Invoke(this, endPawnConnector);
+                    return;
+                }
+            }
+            
+            OnConnectorClickAction?.Invoke(null, null);
+        }
+        
         public void SetActiveState()
         {
             SetState(State.ACTIVE);

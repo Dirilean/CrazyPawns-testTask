@@ -5,23 +5,27 @@ using UnityEngine.EventSystems;
 namespace Runtime
 {
     [RequireComponent(typeof(Collider))]
-    public class PawnConnector : MonoBehaviour, IPointerDownHandler, IDragHandler
+    public class PawnConnector : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
     {
         public bool m_allowConnect = false;
         [SerializeField] public MeshRenderer m_meshRenderer;
         
-        public Action<PawnConnector> m_onClick;
-        public Action<PointerEventData> m_onDrag;
+        public Action<PawnConnector> m_onPointerDown;
+        public Action<PointerEventData> m_onEndDrag;
         public Action<PawnConnector> m_transformChange;
 
         public void OnPointerDown(PointerEventData _eventData)
         {
-            m_onClick?.Invoke(this);
+            isDrag = false;
+            m_onPointerDown?.Invoke(this);
         }
 
-        public void OnDrag(PointerEventData _eventData)
+        public void OnPointerUp(PointerEventData _eventData)
         {
-            m_onDrag?.Invoke(_eventData);
+            if (isDrag)
+            {
+                m_onEndDrag?.Invoke(_eventData);
+            }
         }
 
         private void OnValidate()
@@ -30,6 +34,13 @@ namespace Runtime
             {
                 m_meshRenderer = GetComponent<MeshRenderer>();
             }
+        }
+
+        private bool isDrag = false;
+        public void OnDrag(PointerEventData eventData)
+        {
+            Debug.Log("drag "+ gameObject.name);
+            isDrag = true;
         }
     }
 }
