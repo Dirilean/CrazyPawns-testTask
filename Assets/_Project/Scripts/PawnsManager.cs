@@ -110,7 +110,7 @@ namespace Runtime
 
                 isWaitToEndConnecting = true;
             }
-            else if (_connector.m_allowConnect) //Заканчиваем коннект
+            else if (_connector!=null && _connector.m_allowConnect) //Заканчиваем коннект
             {
                 SetPawnsNormalState();
 
@@ -121,18 +121,28 @@ namespace Runtime
                 m_connectingLine = null;
                 isWaitToEndConnecting = false;
             }
+            else //Заканчиваем коннект но не подцепились к конечному коннектору (может происходить при драге)
+            {
+                ResetUnsuccesfulConnecting();
+            }
         }
 
         private void LateUpdate()
         {
+            //отлавливаем клик по пустому месту (не по коннектору)
             if (isWaitToEndConnecting && !hasNewConnectionClick && Input.GetMouseButtonDown(0))
             {
-                isWaitToEndConnecting = false;
-                SetPawnsNormalState();
-                DeleteNotConnectionLine();
+                ResetUnsuccesfulConnecting();
             }
 
             hasNewConnectionClick = false;
+        }
+
+        private void ResetUnsuccesfulConnecting()
+        {
+            isWaitToEndConnecting = false;
+            SetPawnsNormalState();
+            DeleteNotConnectionLine();
         }
 
         private void SetPawnsNormalState()

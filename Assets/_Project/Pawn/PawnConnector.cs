@@ -13,7 +13,10 @@ namespace Runtime
         public Action<PawnConnector> m_onPointerDown;
         public Action<PointerEventData> m_onEndDrag;
         public Action<PawnConnector> m_transformChange;
+        public Action m_connectorDestroyed;
 
+        private bool isDrag = false;
+        
         public void OnPointerDown(PointerEventData _eventData)
         {
             isDrag = false;
@@ -35,12 +38,15 @@ namespace Runtime
                 m_meshRenderer = GetComponent<MeshRenderer>();
             }
         }
-
-        private bool isDrag = false;
+        
         public void OnDrag(PointerEventData eventData)
         {
-            Debug.Log("drag "+ gameObject.name);
             isDrag = true;
+        }
+
+        private void OnDestroy()
+        {
+            m_connectorDestroyed?.Invoke();
         }
     }
 }
