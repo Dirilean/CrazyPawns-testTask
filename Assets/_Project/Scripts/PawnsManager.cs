@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using Clickable;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Runtime
 {
-    public class PawnsManager : MonoBehaviour
+    public class PawnsManager : MonoBehaviour, IClickDown, IClickDragEnd
     {
         [SerializeField] private Pawn m_pawnPrefab;
         [SerializeField] private ConnectionLine m_connectionLinePrefab;
@@ -22,10 +23,7 @@ namespace Runtime
 
         //Ждем окончания коннекта линии (стартовая точка уже есть)
         private bool isWaitToEndConnecting = false;
-
-        //Пойман клик во время процесса коннекта
-        private bool hasNewConnectionClick;
-
+        
         public void CreatePawns(float _radius, int _count, Material _activeMat, Material _deleteMat)
         {
             m_lastRadius = _radius;
@@ -45,8 +43,8 @@ namespace Runtime
 
                 m_pawns.Add(Instantiate(m_pawnPrefab, randomPosInRadius, Quaternion.identity, transform));
                 m_pawns[i].Init(_activeMat, _deleteMat);
-                m_pawns[i].OnDestroyAction += DeletePawn;
-                m_pawns[i].OnConnectorClickAction += ClickConnector;
+                m_pawns[i].m_onDestroyAction += DeletePawn;
+                m_pawns[i].m_onConnectorClickAction += ClickConnector;
             }
         }
 
@@ -92,7 +90,6 @@ namespace Runtime
 
         public void ClickConnector(Pawn _pawn, PawnConnector _connector)
         {
-            hasNewConnectionClick = true;
             //Начинаем коннект
             if (m_connectingLine == null)
             {
@@ -121,25 +118,12 @@ namespace Runtime
                 m_connectingLine = null;
                 isWaitToEndConnecting = false;
             }
-            else //Заканчиваем коннект но не подцепились к конечному коннектору (может происходить при драге)
-            {
-                ResetUnsuccesfulConnecting();
-            }
         }
 
-        private void LateUpdate()
+        private void TryResetUnsuccesfulConnecting()
         {
-            //отлавливаем клик по пустому месту (не по коннектору)
-            if (isWaitToEndConnecting && !hasNewConnectionClick && Input.GetMouseButtonDown(0))
-            {
-                ResetUnsuccesfulConnecting();
-            }
-
-            hasNewConnectionClick = false;
-        }
-
-        private void ResetUnsuccesfulConnecting()
-        {
+            if (!isWaitToEndConnecting) return;
+            
             isWaitToEndConnecting = false;
             SetPawnsNormalState();
             DeleteNotConnectionLine();
@@ -170,5 +154,17 @@ namespace Runtime
             Handles.DrawWireDisc(transform.position, transform.up, m_lastRadius);
         }
 #endif
+        
+        //Действия по мисклику
+        public void OnClickDown()
+        {
+            TryResetUnsuccesfulConnecting();
+        }
+
+        //Действия по мисклику
+        public void OnClickDragEnd()
+        {
+            TryResetUnsuccesfulConnecting();
+        }
     }
 }

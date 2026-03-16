@@ -1,34 +1,33 @@
 ﻿using System;
+using Clickable;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Runtime
 {
     [RequireComponent(typeof(Collider))]
-    public class PawnConnector : MonoBehaviour, IPointerDownHandler, IPointerUpHandler, IDragHandler
+    public class PawnConnector : MonoBehaviour, IClickDown, IClickDragEnd
     {
-        public bool m_allowConnect = false;
         [SerializeField] public MeshRenderer m_meshRenderer;
-        
+
+        public bool m_allowConnect = false;
         public Action<PawnConnector> m_onPointerDown;
-        public Action<PointerEventData> m_onEndDrag;
+        public Action<PawnConnector> m_onEndDrag;
         public Action<PawnConnector> m_transformChange;
         public Action m_connectorDestroyed;
 
-        private bool isDrag = false;
-        
-        public void OnPointerDown(PointerEventData _eventData)
+        private void OnDestroy()
         {
-            isDrag = false;
+            m_connectorDestroyed?.Invoke();
+        }
+
+        public void OnClickDown()
+        {
             m_onPointerDown?.Invoke(this);
         }
 
-        public void OnPointerUp(PointerEventData _eventData)
+        public void OnClickDragEnd()
         {
-            if (isDrag)
-            {
-                m_onEndDrag?.Invoke(_eventData);
-            }
+            m_onEndDrag?.Invoke(this);
         }
 
         private void OnValidate()
@@ -37,16 +36,6 @@ namespace Runtime
             {
                 m_meshRenderer = GetComponent<MeshRenderer>();
             }
-        }
-        
-        public void OnDrag(PointerEventData eventData)
-        {
-            isDrag = true;
-        }
-
-        private void OnDestroy()
-        {
-            m_connectorDestroyed?.Invoke();
         }
     }
 }

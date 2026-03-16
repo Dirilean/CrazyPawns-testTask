@@ -1,33 +1,40 @@
 ﻿using System;
+using Clickable;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Runtime
 {
     [RequireComponent(typeof(Collider))]
-    public class PawnBody : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
+    public class PawnBody : MonoBehaviour, IClickDrag,IClickDown, IClickDragEnd
     {
         [SerializeField] public MeshRenderer m_meshRenderer;
         
-        public Action<PointerEventData> m_onBeginDrag;
-        public Action<PointerEventData> m_onEndDrag;
-        public Action<PointerEventData> m_onDrag;
+        public Action m_onBeginDrag;
+        public Action m_onEndDrag;
+        public Action m_onDrag;
         
-        public void OnDrag(PointerEventData _eventData)
+        private bool isDrag = false;
+        
+        public void OnClickDrag()
         {
-            m_onDrag?.Invoke(_eventData);
+            isDrag = true;
+            m_onDrag?.Invoke();
         }
 
-        public void OnBeginDrag(PointerEventData _eventData)
+        public void OnClickDown()
         {
-            m_onBeginDrag?.Invoke(_eventData);
+            isDrag = false;
+            m_onBeginDrag?.Invoke();
         }
 
-        public void OnEndDrag(PointerEventData _eventData)
+        public void OnClickDragEnd()
         {
-            m_onEndDrag?.Invoke(_eventData);
+            if (isDrag)
+            {
+                m_onEndDrag?.Invoke();
+            }
         }
-
+        
         private void OnValidate()
         {
             if (m_meshRenderer == null)

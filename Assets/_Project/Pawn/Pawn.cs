@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
 namespace Runtime
 {
@@ -12,18 +11,20 @@ namespace Runtime
         [SerializeField] private PawnBody m_pawnBody;
         [SerializeField] private PawnConnector[] m_pawnSpheres;
 
-        public Action<Pawn> OnDestroyAction;
-        public Action<Pawn,PawnConnector> OnConnectorClickAction;
+        public Action<Pawn> m_onDestroyAction;
+        public Action<Pawn,PawnConnector> m_onConnectorClickAction;
         
         private float m_planeDistance;
         private Vector3 m_clickOffset;
         private Plane m_dragPlane;
+        private Camera m_camera;
 
         private Material m_normalMat;
         private Material m_activeMat;
         private Material m_deleteMat;
         private State m_currentState = State.NORMAL;
-
+        private bool bodyIsDraggng = false;
+        
         enum State
         {
             NORMAL,
@@ -39,6 +40,7 @@ namespace Runtime
 
         private void Start()
         {
+            m_camera = Camera.main;
             m_pawnBody.m_onBeginDrag += OnStartDragBody;
             m_pawnBody.m_onEndDrag += OnEndDragBody;
             m_pawnBody.m_onDrag += OnDragBody;
@@ -50,27 +52,18 @@ namespace Runtime
 
             m_normalMat = m_pawnBody.m_meshRenderer.sharedMaterial;
         }
-        
+
         private void OnClickDownConnector(PawnConnector _sphere)
         {
-            OnConnectorClickAction?.Invoke(this, _sphere);
+            m_onConnectorClickAction?.Invoke(this, _sphere);
         }
-        private void OnEndDragConnector(PointerEventData _eventData)
+
+        private void OnEndDragConnector(PawnConnector _sphere)
         {
-            Ray ray = GetCamera(_eventData).ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                var endPawnConnector= hit.collider.GetComponent<PawnConnector>();
-                if (endPawnConnector != null)
-                {
-                    OnConnectorClickAction?.Invoke(this, endPawnConnector);
-                    return;
-                }
-            }
-            
-            OnConnectorClickAction?.Invoke(null, null);
+            if (bodyIsDraggng) return;
+            m_onConnectorClickAction?.Invoke(this, _sphere);
         }
-        
+
         public void SetActiveState()
         {
             SetState(State.ACTIVE);
@@ -81,10 +74,11 @@ namespace Runtime
             SetState(State.NORMAL);
         }
 
-        private void OnStartDragBody(PointerEventData _eventData)
+        private void OnStartDragBody()
         {
+            bodyIsDraggng = true;
             m_dragPlane = new Plane(Vector3.up, transform.position);
-            Ray ray = GetCamera(_eventData).ScreenPointToRay(Input.mousePosition);
+            Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
 
             if (m_dragPlane.Raycast(ray, out m_planeDistance))
             {
@@ -93,13 +87,15 @@ namespace Runtime
             }
         }
 
-        private void OnDragBody(PointerEventData _eventData)
+        private void OnDragBody()
         {
-            MoveToMouse(_eventData);
+            MoveToMouse();
         }
         
-        private void OnEndDragBody(PointerEventData _eventData)
+        private void OnEndDragBody()
         {
+            bodyIsDraggng = false;
+            
             if (m_currentState == State.DELETE)
             {
                 Destroy(gameObject);
@@ -109,9 +105,9 @@ namespace Runtime
             SetState(State.NORMAL);
         }
         
-        private void MoveToMouse(PointerEventData _eventData)
+        private void MoveToMouse()
         {
-            Ray ray = GetCamera(_eventData).ScreenPointToRay(Input.mousePosition);
+            Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
             
             if (m_dragPlane.Raycast(ray, out m_planeDistance))
             {
@@ -179,17 +175,10 @@ namespace Runtime
                 m_pawnSpheres[i].m_meshRenderer.material = _connectorMaterial;
             }
         }
-        
-        private Camera GetCamera(PointerEventData _eventData)
-        {
-            return _eventData.enterEventCamera ??
-                   _eventData.pressEventCamera ??
-                   Camera.main;
-        }
 
         private void OnDestroy()
         {
-            OnDestroyAction?.Invoke(this);
+            m_onDestroyAction?.Invoke(this);
         }
 
         private void OnValidate()
