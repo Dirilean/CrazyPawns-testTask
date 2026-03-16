@@ -5,6 +5,7 @@ namespace Pawn
 {
     public class Pawn : MonoBehaviour
     {
+        [SerializeField] private LayerMask m_floorLayerMask;
         [SerializeField] private float m_maxFloorDetectedDistance = 5f;
         [SerializeField] private Vector3 m_floorDetectOffset = new(0f, 0.2f, 0f);
 
@@ -140,14 +141,17 @@ namespace Pawn
 
         private void TrySetDeleteState()
         {
-            if (Physics.Raycast(transform.position + m_floorDetectOffset, Vector3.down, out _,
-                    m_maxFloorDetectedDistance))
+           
+            if (Physics.Raycast(transform.position + m_floorDetectOffset, -Vector3.up, out var t,
+                    m_maxFloorDetectedDistance,m_floorLayerMask ))
             {
                 SetState(State.NORMAL);
+                Debug.DrawLine(transform.position + m_floorDetectOffset, -Vector3.up*m_maxFloorDetectedDistance,Color.green);
             }
             else
             {
                 SetState(State.DELETE);
+                Debug.DrawLine(transform.position + m_floorDetectOffset, -Vector3.up*m_maxFloorDetectedDistance,Color.magenta);
             }
         }
 

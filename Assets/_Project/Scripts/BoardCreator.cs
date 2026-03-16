@@ -3,7 +3,8 @@ using UnityEngine;
 public class BoardCreator : MonoBehaviour
 {
     private int m_floorLayer;
-    
+
+    [SerializeField] private GameObject m_quadPrefab;
     [SerializeField] private float m_checkboardQuadSize = 1.5f;
     [SerializeField] private Transform m_chessBoardTransform;
     [SerializeField] private Material m_matWhite;
@@ -54,12 +55,9 @@ public class BoardCreator : MonoBehaviour
 
     private GameObject CreateFloorQuad(int _row, int _col, Vector3 _offset)
     {
-        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        quad.transform.SetParent(m_chessBoardTransform);
+        var quad = Instantiate(m_quadPrefab, m_chessBoardTransform);
         quad.layer = m_floorLayer;
-        quad.transform.localScale = Vector3.one * 1.5f;
-        quad.transform.localRotation = Quaternion.Euler(90, 0, 0);
-
+        quad.transform.localScale = Vector3.one * m_checkboardQuadSize;
         quad.transform.localPosition =
             new Vector3(_row * m_checkboardQuadSize, 0, _col * m_checkboardQuadSize) +
             _offset;

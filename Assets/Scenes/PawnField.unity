@@ -356,6 +356,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5b1f8b97f037f746944fb71044cae14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_quadPrefab: {fileID: 4408952862150094651, guid: 6dddc97434bd0f24e8df94433be2e1ce,
+    type: 3}
   m_checkboardQuadSize: 1.5
   m_chessBoardTransform: {fileID: 1178066028}
   m_matWhite: {fileID: 2100000, guid: 1d07a8de44acc7040bd8315b247bab05, type: 2}
