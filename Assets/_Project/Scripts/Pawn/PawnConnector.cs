@@ -1,8 +1,8 @@
 ﻿using System;
-using Clickable;
+using ClickManager;
 using UnityEngine;
 
-namespace Runtime
+namespace Pawn
 {
     [RequireComponent(typeof(Collider))]
     public class PawnConnector : MonoBehaviour, IClickDown, IClickDragEnd

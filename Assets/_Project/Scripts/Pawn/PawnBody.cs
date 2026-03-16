@@ -1,8 +1,8 @@
 ﻿using System;
-using Clickable;
+using ClickManager;
 using UnityEngine;
 
-namespace Runtime
+namespace Pawn
 {
     [RequireComponent(typeof(Collider))]
     public class PawnBody : MonoBehaviour, IClickDrag,IClickDown, IClickDragEnd
@@ -13,28 +13,21 @@ namespace Runtime
         public Action m_onEndDrag;
         public Action m_onDrag;
         
-        private bool isDrag = false;
-        
         public void OnClickDrag()
         {
-            isDrag = true;
             m_onDrag?.Invoke();
         }
 
         public void OnClickDown()
         {
-            isDrag = false;
             m_onBeginDrag?.Invoke();
         }
 
         public void OnClickDragEnd()
         {
-            if (isDrag)
-            {
-                m_onEndDrag?.Invoke();
-            }
+            m_onEndDrag?.Invoke();
         }
-        
+
         private void OnValidate()
         {
             if (m_meshRenderer == null)

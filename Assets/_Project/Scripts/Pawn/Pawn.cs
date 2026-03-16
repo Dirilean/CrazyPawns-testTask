@@ -1,19 +1,19 @@
 ﻿using System;
 using UnityEngine;
 
-namespace Runtime
+namespace Pawn
 {
     public class Pawn : MonoBehaviour
     {
-        private const float MAX_FLOOR_DETECTED_DISTANCE = 5f;
-        private Vector3 m_floorDetectOffset = new (0f, 0.2f, 0f);
+        [SerializeField] private float m_maxFloorDetectedDistance = 5f;
+        [SerializeField] private Vector3 m_floorDetectOffset = new(0f, 0.2f, 0f);
 
         [SerializeField] private PawnBody m_pawnBody;
         [SerializeField] private PawnConnector[] m_pawnSpheres;
 
         public Action<Pawn> m_onDestroyAction;
-        public Action<Pawn,PawnConnector> m_onConnectorClickAction;
-        
+        public Action<Pawn, PawnConnector> m_onConnectorClickAction;
+
         private float m_planeDistance;
         private Vector3 m_clickOffset;
         private Plane m_dragPlane;
@@ -23,19 +23,13 @@ namespace Runtime
         private Material m_activeMat;
         private Material m_deleteMat;
         private State m_currentState = State.NORMAL;
-        private bool bodyIsDraggng = false;
-        
-        enum State
+        private bool m_bodyIsDraggng = false;
+
+        public enum State
         {
             NORMAL,
             ACTIVE,
             DELETE
-        }
-
-        public void Init(Material _activeMat, Material _deleteMat)
-        {
-            m_activeMat = _activeMat;
-            m_deleteMat = _deleteMat;
         }
 
         private void Start()
@@ -52,96 +46,17 @@ namespace Runtime
 
             m_normalMat = m_pawnBody.m_meshRenderer.sharedMaterial;
         }
-
-        private void OnClickDownConnector(PawnConnector _sphere)
-        {
-            m_onConnectorClickAction?.Invoke(this, _sphere);
-        }
-
-        private void OnEndDragConnector(PawnConnector _sphere)
-        {
-            if (bodyIsDraggng) return;
-            m_onConnectorClickAction?.Invoke(this, _sphere);
-        }
-
-        public void SetActiveState()
-        {
-            SetState(State.ACTIVE);
-        }
-
-        public void SetNormalState()
-        {
-            SetState(State.NORMAL);
-        }
-
-        private void OnStartDragBody()
-        {
-            bodyIsDraggng = true;
-            m_dragPlane = new Plane(Vector3.up, transform.position);
-            Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
-
-            if (m_dragPlane.Raycast(ray, out m_planeDistance))
-            {
-                Vector3 hitPoint = ray.GetPoint(m_planeDistance);
-                m_clickOffset = transform.position - hitPoint;
-            }
-        }
-
-        private void OnDragBody()
-        {
-            MoveToMouse();
-        }
         
-        private void OnEndDragBody()
+        public void Init(Material _activeMat, Material _deleteMat)
         {
-            bodyIsDraggng = false;
-            
-            if (m_currentState == State.DELETE)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            SetState(State.NORMAL);
-        }
-        
-        private void MoveToMouse()
-        {
-            Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
-            
-            if (m_dragPlane.Raycast(ray, out m_planeDistance))
-            {
-                Vector3 hitPoint = ray.GetPoint(m_planeDistance);
-                Vector3 newPosition = hitPoint + m_clickOffset;
-
-                transform.position = newPosition;
-            }
-            
-            UpdateState();
-
-            //Вызываем событие что мы поменяли позицию пешки
-            for (int i = 0; i < m_pawnSpheres.Length; i++)
-            {
-                m_pawnSpheres[i].m_transformChange?.Invoke(m_pawnSpheres[i]);
-            }   
-        }
-        
-        private void UpdateState()
-        {
-            if (Physics.Raycast(transform.position + m_floorDetectOffset, Vector3.down, out _, MAX_FLOOR_DETECTED_DISTANCE))
-            {
-                SetState(State.NORMAL);
-            }
-            else
-            {
-                SetState(State.DELETE);
-            }
+            m_activeMat = _activeMat;
+            m_deleteMat = _deleteMat;
         }
 
-        private void SetState(State _state)
+        public void SetState(State _state)
         {
             if (m_currentState == _state) return;
-            
+
             m_currentState = _state;
             switch (_state)
             {
@@ -159,6 +74,82 @@ namespace Runtime
                     break;
             }
         }
+        
+        private void OnClickDownConnector(PawnConnector _sphere)
+        {
+            m_onConnectorClickAction?.Invoke(this, _sphere);
+        }
+
+        private void OnEndDragConnector(PawnConnector _sphere)
+        {
+            if (m_bodyIsDraggng) return;
+            m_onConnectorClickAction?.Invoke(this, _sphere);
+        }
+
+        private void OnStartDragBody()
+        {
+            m_bodyIsDraggng = true;
+            m_dragPlane = new Plane(Vector3.up, transform.position);
+            Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
+
+            if (m_dragPlane.Raycast(ray, out m_planeDistance))
+            {
+                Vector3 hitPoint = ray.GetPoint(m_planeDistance);
+                m_clickOffset = transform.position - hitPoint;
+            }
+        }
+
+        private void OnDragBody()
+        {
+            MoveToMouse();
+        }
+
+        private void OnEndDragBody()
+        {
+            m_bodyIsDraggng = false;
+
+            if (m_currentState == State.DELETE)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            SetState(State.NORMAL);
+        }
+
+        private void MoveToMouse()
+        {
+            Ray ray = m_camera.ScreenPointToRay(Input.mousePosition);
+
+            if (m_dragPlane.Raycast(ray, out m_planeDistance))
+            {
+                Vector3 hitPoint = ray.GetPoint(m_planeDistance);
+                Vector3 newPosition = hitPoint + m_clickOffset;
+
+                transform.position = newPosition;
+            }
+
+            TrySetDeleteState();
+
+            //Вызываем событие что мы поменяли позицию пешки
+            for (int i = 0; i < m_pawnSpheres.Length; i++)
+            {
+                m_pawnSpheres[i].m_transformChange?.Invoke(m_pawnSpheres[i]);
+            }
+        }
+
+        private void TrySetDeleteState()
+        {
+            if (Physics.Raycast(transform.position + m_floorDetectOffset, Vector3.down, out _,
+                    m_maxFloorDetectedDistance))
+            {
+                SetState(State.NORMAL);
+            }
+            else
+            {
+                SetState(State.DELETE);
+            }
+        }
 
         private void SetAllowConnectionState(bool _allow)
         {
@@ -167,6 +158,7 @@ namespace Runtime
                 m_pawnSpheres[i].m_allowConnect = _allow;
             }
         }
+
         private void SetCommonMaterial(Material _material, Material _connectorMaterial)
         {
             m_pawnBody.m_meshRenderer.material = _material;

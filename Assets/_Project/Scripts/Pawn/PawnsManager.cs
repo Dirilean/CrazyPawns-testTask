@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using Clickable;
+using ClickManager;
 using UnityEditor;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace Runtime
+namespace Pawn
 {
     public class PawnsManager : MonoBehaviour, IClickDown, IClickDragEnd
     {
@@ -12,17 +12,14 @@ namespace Runtime
         [SerializeField] private ConnectionLine m_connectionLinePrefab;
 
         private List<Pawn> m_pawns = new();
+        private List<ConnectionLine> m_connectingLines = new();
 
         //Последний назначенный радиус для спавна пешек (сохраняем для отрисовки гизмо)
         private float m_lastRadius;
-
         //Текущая линия которая сейчас коннектится
         private ConnectionLine m_connectingLine;
-
-        private List<ConnectionLine> m_connectingLines = new();
-
         //Ждем окончания коннекта линии (стартовая точка уже есть)
-        private bool isWaitToEndConnecting = false;
+        private bool m_isWaitToEndConnecting = false;
         
         public void CreatePawns(float _radius, int _count, Material _activeMat, Material _deleteMat)
         {
@@ -88,7 +85,7 @@ namespace Runtime
             return Vector3.one;
         }
 
-        public void ClickConnector(Pawn _pawn, PawnConnector _connector)
+        private void ClickConnector(Pawn _pawn, PawnConnector _connector)
         {
             //Начинаем коннект
             if (m_connectingLine == null)
@@ -97,15 +94,15 @@ namespace Runtime
                 for (int i = 0; i < m_pawns.Count; i++)
                 {
                     if (m_pawns[i] == _pawn) continue;
-                    m_pawns[i].SetActiveState();
+                    m_pawns[i].SetState(Pawn.State.ACTIVE);
                 }
 
-                _pawn.SetNormalState();
+                _pawn.SetState(Pawn.State.NORMAL);
 
                 m_connectingLine = Instantiate(m_connectionLinePrefab, transform);
                 m_connectingLine.SetStart(_connector);
 
-                isWaitToEndConnecting = true;
+                m_isWaitToEndConnecting = true;
             }
             else if (_connector!=null && _connector.m_allowConnect) //Заканчиваем коннект
             {
@@ -116,35 +113,32 @@ namespace Runtime
 
                 m_connectingLines.Add(m_connectingLine);
                 m_connectingLine = null;
-                isWaitToEndConnecting = false;
+                m_isWaitToEndConnecting = false;
             }
         }
 
         private void TryResetUnsuccesfulConnecting()
         {
-            if (!isWaitToEndConnecting) return;
+            if (!m_isWaitToEndConnecting) return;
             
-            isWaitToEndConnecting = false;
+            m_isWaitToEndConnecting = false;
             SetPawnsNormalState();
-            DeleteNotConnectionLine();
+            
+            if (m_connectingLine != null)
+                Destroy(m_connectingLine.gameObject);
+
+            m_connectingLine = null;
+            m_isWaitToEndConnecting = false;
         }
 
         private void SetPawnsNormalState()
         {
             for (int i = 0; i < m_pawns.Count; i++)
             {
-                m_pawns[i].SetNormalState();
+                m_pawns[i].SetState(Pawn.State.NORMAL);
             }
         }
-
-        private void DeleteNotConnectionLine()
-        {
-            if (m_connectingLine != null)
-                Destroy(m_connectingLine.gameObject);
-
-            m_connectingLine = null;
-            isWaitToEndConnecting = false;
-        }
+        
 
 #if UNITY_EDITOR
         private void OnDrawGizmos()

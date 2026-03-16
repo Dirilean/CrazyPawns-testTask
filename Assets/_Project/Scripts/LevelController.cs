@@ -1,32 +1,30 @@
 ﻿using CrazyPawn;
 using EditorAttributes;
+using Pawn;
 using UnityEngine;
 
-namespace Runtime
+public class LevelController : MonoBehaviour
 {
-    public class LevelController : MonoBehaviour
+    [SerializeField] private CrazyPawnSettings m_settings;
+    [SerializeField] private BoardCreator m_boardCreator;
+    [SerializeField] private PawnsManager m_pawnsSpawner;
+
+    private void Start()
     {
-        [SerializeField] private CrazyPawnSettings m_settings;
-        [SerializeField] private BoardCreator m_boardCreator;
-        [SerializeField] private PawnsManager m_pawnsSpawner;
+        CreateBorder();
+        CreatePawns();
+    }
 
-        private void Start()
-        {
-            CreateBorder();
-            CreatePawns();
-        }
+    [Button("Create border")]
+    private void CreateBorder()
+    {
+        m_boardCreator.CreateBoard(m_settings.CheckerboardSize, m_settings.BlackCellColor,
+            m_settings.WhiteCellColor);
+    }
 
-        [Button("Create border")]
-        public void CreateBorder()
-        {
-            m_boardCreator.CreateBoard(m_settings.CheckerboardSize, m_settings.BlackCellColor,
-                m_settings.WhiteCellColor);
-        }
-
-        [Button("Create pawns")]
-        public void CreatePawns()
-        {
-            m_pawnsSpawner.CreatePawns(m_settings.InitialZoneRadius, m_settings.InitialPawnCount, m_settings.ActiveConnectorMaterial, m_settings.DeleteMaterial);
-        }
+    [Button("Create pawns")]
+    private void CreatePawns()
+    {
+        m_pawnsSpawner.CreatePawns(m_settings.InitialZoneRadius, m_settings.InitialPawnCount, m_settings.ActiveConnectorMaterial, m_settings.DeleteMaterial);
     }
 }

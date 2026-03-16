@@ -1,4 +1,4 @@
-﻿namespace Clickable
+﻿namespace ClickManager
 {
     public interface IClickDrag
     {

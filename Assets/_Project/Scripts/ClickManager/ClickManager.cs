@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
-namespace Clickable
+namespace ClickManager
 {
     public class ClickManager : MonoBehaviour
     {
@@ -18,7 +18,8 @@ namespace Clickable
         private Camera m_camera;
         private IClickDrag m_draggingObj;
         private Vector3 m_lastMouseDownPos;
-        private bool m_isDragProcess = false;
+        private bool m_isDragProcess;
+        private bool m_clickOnInteractable;
         
         void Start()
         {
@@ -60,7 +61,6 @@ namespace Clickable
             }
         }
 
-        private bool clickOnInteractable = false;
         //Если нажата лкм то выбираем соотвествующий предмет и вызываем его метод,
         //если объекта нет то вызываем для всех не имеющих тела
         private void ProcessClick()
@@ -77,7 +77,7 @@ namespace Clickable
                     hit.collider.TryGetComponent<IClickDrag>(out m_draggingObj);
                     if (clickable != null)
                     {
-                        clickOnInteractable = true;
+                        m_clickOnInteractable = true;
                         clickable.OnClickDown();
                         return;
                     }
@@ -94,7 +94,7 @@ namespace Clickable
             //обрабатываем окончание перетаскивания
             else if (Input.GetMouseButtonUp(0) && m_isDragProcess)
             {
-                clickOnInteractable = false;
+                m_clickOnInteractable = false;
                 m_isDragProcess = false;
                 m_draggingObj = null;
 
@@ -126,7 +126,7 @@ namespace Clickable
                 }
 
                 //если кликнули по объекту и его действия выполняются то не нужно выполнять перетаскивание для пустышек
-                if (!clickOnInteractable)
+                if (!m_clickOnInteractable)
                 {
                     for (int i = 0; i < m_mouseDragDummy.Count; i++)
                     {
