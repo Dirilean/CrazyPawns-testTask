@@ -31,15 +31,30 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
+      - name: Fix MIME types for WebGL
+        run: |
+          # Создаем папку для артефакта с правильными MIME-типами
+          mkdir -p ./_site
+          cp -r ./Release/* ./_site/
+          
+          # Добавляем правильные заголовки для .wasm файлов
+          echo "/*.wasm application/wasm" > ./_site/_headers
+          echo "/*.data application/octet-stream" >> ./_site/_headers
+          echo "/*.br application/octet-stream" >> ./_site/_headers
+          echo "/*.gz application/octet-stream" >> ./_site/_headers
+          
+          # Создаем .nojekyll чтобы отключить обработку Jekyll
+          touch ./_site/.nojekyll
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './Release'
-      - name: Fix MIME types for WebGL
-        run: |
-          echo "/*.wasm application/wasm" >> ./Release/_headers
+          path: './_site'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
