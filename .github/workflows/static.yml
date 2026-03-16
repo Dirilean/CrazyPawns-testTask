@@ -37,6 +37,9 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: './Release'
+      - name: Fix MIME types for WebGL
+        run: |
+          echo "/*.wasm application/wasm" >> ./Release/_headers
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
