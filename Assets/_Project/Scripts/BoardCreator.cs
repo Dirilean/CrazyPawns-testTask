@@ -1,4 +1,3 @@
-using System;
 using UnityEngine;
 
 public class BoardCreator : MonoBehaviour
@@ -7,6 +6,8 @@ public class BoardCreator : MonoBehaviour
     
     [SerializeField] private float m_checkboardQuadSize = 1.5f;
     [SerializeField] private Transform m_chessBoardTransform;
+    [SerializeField] private Material m_matWhite;
+    [SerializeField] private Material m_matBlack;
 
     private GameObject[] m_board;
 
@@ -18,7 +19,10 @@ public class BoardCreator : MonoBehaviour
     public void CreateBoard(int _checkerboardSize, Color _blackCellColor, Color _whiteCellColor)
     {
         DeleteBoard();
-
+        
+        m_matWhite.color = _whiteCellColor;
+        m_matBlack.color = _blackCellColor;
+        
         //Вычисляем середину доски с учетом что пивот quad в его центре 
         float centerCheckBoardSize =
             -_checkerboardSize * 0.5f * m_checkboardQuadSize +
@@ -31,7 +35,7 @@ public class BoardCreator : MonoBehaviour
             for (int col = 0; col < _checkerboardSize; col++)
             {
                 m_board[row * _checkerboardSize + col] =
-                    CreateFloorQuad(row, col, offset, _blackCellColor, _whiteCellColor);
+                    CreateFloorQuad(row, col, offset);
             }
         }
     }
@@ -48,8 +52,7 @@ public class BoardCreator : MonoBehaviour
         m_board = null;
     }
 
-    private GameObject CreateFloorQuad(int _row, int _col, Vector3 _offset, Color _blackCellColor,
-        Color _whiteCellColor)
+    private GameObject CreateFloorQuad(int _row, int _col, Vector3 _offset)
     {
         var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
         quad.transform.SetParent(m_chessBoardTransform);
@@ -64,8 +67,8 @@ public class BoardCreator : MonoBehaviour
         bool isEvenRow = _row % 2 == 0;
         bool isEvenCol = _col % 2 == 0;
         bool isWhiteCell = isEvenRow ^ isEvenCol;
-        quad.GetComponent<Renderer>().material.color =
-            isWhiteCell ? _whiteCellColor : _blackCellColor;
+        quad.GetComponent<Renderer>().material =
+            isWhiteCell ? m_matWhite : m_matBlack;
 
         return quad;
     }
